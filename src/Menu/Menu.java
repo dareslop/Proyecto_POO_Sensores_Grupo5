@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 
 public class Menu {
     public static ArrayList<Sensor> sensores = new ArrayList<>();      
-    
     public static void main(String[] args) {  
         Usuario u = inicioSistema();
         if(u!=null){            
