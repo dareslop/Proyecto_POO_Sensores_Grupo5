@@ -1,59 +1,57 @@
 package Sensor;
 
 import Porpiedades.PropiedadesEvaluadas;
-import java.util.Objects;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import Menu.Menu;
 
-public class Sensor {
-    private String id;       
-    private PropiedadesEvaluadas evaluaciones;    
+public class Observacion {  
+    private String observacion;
 
-    public Sensor(String id,PropiedadesEvaluadas evaluaciones) {
-        this.id = id;       
-        this.evaluaciones = evaluaciones;
-    }
-    public String getId() {
-        return id;
-    }
-    public void setId(String id) {
-        this.id = id;
-    }
-    public PropiedadesEvaluadas getEvaluaciones() {
-        return evaluaciones;
-    }
-    public void setEvaluaciones(PropiedadesEvaluadas evaluaciones) {
-        this.evaluaciones = evaluaciones;
+    public Observacion(String observacion) {
+        this.observacion = observacion;
     }  
+    public String getObservacion() {
+        return this.observacion;
+    }
     
-    public void generarObservacion(){                    
-                                 
-        String[] propiedades = this.evaluaciones.toString().split(",");
-        for(String s:propiedades){
-            if(s.contains("temp") && !s.contains("fechaEvaluacion")){
-                String[] str = s.split("-"); 
-                Notificacion.Notificacion.observaciones.add(new Observacion("El sensor "+this.id+" realiza una observación en la fecha "
-                    +this.evaluaciones.getFechaEvaluacion()+" para la propiedad "+str[0]+" cuyo resultado es "+str[1]+" grados."));                
-            }                                                                     //2-8-14-17
-            if(!s.contains("fechaEvaluacion")){
-            String[] str = s.split("-");                  
-                Notificacion.Notificacion.observaciones.add(new Observacion("El sensor "+this.id+" realiza una observación en la fecha "
-                    +this.evaluaciones.getFechaEvaluacion()+" para la propiedad "+str[0]+" cuyo resultado cuyo resultado es "+str[1]+" ."));               
-            }
+
+    public static void leerObservaciones(){     
+    Sensor s1;
+    PropiedadesEvaluadas p1;
+    try (BufferedReader lector = new BufferedReader(new FileReader("iot_telemetry_data_new.csv"))){             
+            String line = "";      
+            line = lector.readLine();            
+            while((line = lector.readLine())!= null){                
+                String [] sep = line.split(",");                
+                String[] fecha=sep[9].split(" ");
+                p1 = new PropiedadesEvaluadas(fecha[0]+"-"+fecha[1],Float.parseFloat(sep[2].substring(1, sep[2].length()-1)),
+                        Float.parseFloat(sep[3].substring(1, sep[3].length()-1)),Boolean.valueOf(sep[4]),
+                        Float.parseFloat(sep[5].substring(1, sep[5].length()-1)),
+                Boolean.valueOf(sep[6]), Float.parseFloat(sep[7].substring(1, sep[7].length()-1)),
+                        Float.parseFloat(sep[8].substring(1, sep[8].length()-1)));   
+                s1=new Sensor(sep[1],p1);        
+                Menu.sensores.add(s1);                          
+                    }
+                }                          
+         
+    catch (FileNotFoundException ex) {
+            System.err.println("No existe el archivo: "+ex);
+        } 
+    catch (IOException ex) {
+            System.err.println("Error lectura del archivo: "+ex);
+        }  
+    catch(NumberFormatException ex){
+        System.err.println("error no tengo idea");
         }
-    }          
-@Override
-    public boolean equals(Object obj) { 
-         if(obj == null){
-        return false;
-        }
-        final Sensor other = (Sensor) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }       
-        return true;
-    }  
-@Override
+    }
+
+    @Override
     public String toString() {
-        return this.id;
+        return observacion ;
     }
     
-}  
+}
