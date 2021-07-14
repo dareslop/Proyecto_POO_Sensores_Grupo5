@@ -476,5 +476,3 @@ public class Menu {
          JOptionPane.showMessageDialog(null,"Se ha creado el archivo '"+"NOTIFICACIONES"+rangoFechas+".txt'");
     }
 }
-    
-
