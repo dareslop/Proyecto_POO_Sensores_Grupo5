@@ -1,4 +1,4 @@
-package Usuario;
+ackage Usuario;
 
 
 
@@ -88,5 +88,8 @@ public class Usuario {
                 +valores+"-"+sensores;
     }
 }
+    
+    
+
     
     
