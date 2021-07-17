@@ -103,7 +103,10 @@ import javax.swing.JOptionPane;
                 u = RegistrarUsuario();
                 try{
                 if(u != null){
-                    JOptionPane.showMessageDialog(null, "REINCIE LA APLICACION PARA INICIAR SESION.");} }
+                    JOptionPane.showMessageDialog(null, "REINCIE LA APLICACION PARA INICIAR SESION.");
+                    break;
+                    } 
+                }
                 catch(NullPointerException ex){}
                 JOptionPane.showMessageDialog(null, "REINCIE LA APLICACION E INTENTE DE NUEVO");
                 return null;          
@@ -125,15 +128,10 @@ import javax.swing.JOptionPane;
                     case -1:
                         break;
                     case 0:
-                        String[] propiedades = {"co","humidity","ligth","lpg","motion","smoke","temp"};
-                        int eleccion = JOptionPane.showOptionDialog(null, "ESCOJA LA PROPIEDAD QUE DESEA AGREGAR", "REGISTRO USUARIO"
-                            ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
-                            ,null, propiedades, propiedades[0]);
-                        String peligro = JOptionPane.showInputDialog("ESCRIBA EL VALOR DE PELIGRO");
-                        String moderado = JOptionPane.showInputDialog("ESCRIBA EL VALOR MODERADO");
-                        u.getPropiedades().put(propiedades[eleccion],peligro+"/"+moderado);                       
-                       JOptionPane.showMessageDialog(null, "SE HA AGREGAD0 LA PROPIEDAD");
+                       Menu.agragarPropiedad(u);
                        break;
+                    case 1:
+                        break;
                     }
                     sensores.forEach((s) -> { 
                     s.generarObservacion();}); 
@@ -149,7 +147,13 @@ import javax.swing.JOptionPane;
                             break;
                         case 0:                           
                             JOptionPane.showInternalMessageDialog(null, "TIENE "+u.getSensoresIds().size()+" sensores enrolados");
-                            int eleccion = JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A UN SENSOR?");                                                        
+                            int eleccion = 0;
+                            if(u.getSensoresIds().size()==0){
+                                eleccion= JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A UN SENSOR?");   
+                            }
+                            else{
+                                eleccion = JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A OTRO SENSOR?");
+                            }
                             switch(eleccion){
                                 case -1:
                                     break;
@@ -158,8 +162,7 @@ import javax.swing.JOptionPane;
                                             ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
                                             ,null, Menu.sensoresIds.toArray(), Menu.sensoresIds.toArray()[0]);
                                     String idSensor = String.valueOf(Menu.sensoresIds.toArray()[eleccion]);
-                                    u.getSensoresIds().add(idSensor);
-                                    IniciarSesion.listaUsuarios.add(u);
+                                    u.getSensoresIds().add(idSensor);                                    
                                     Menu.enrolarSensor();                                    
                                     break;
                                 case 1:
@@ -578,34 +581,46 @@ import javax.swing.JOptionPane;
             }
     public static void enrolarSensor(){
         //usuario:****-contraseña:****-propiedad:**-rangovalores-sensor1;sensor2.....
-        File archivo = new File("ListaUsuarios.txt");   
-            if(!archivo.exists()){
-            try{          
+        File archivo = new File("ListaUsuarios.txt");     
+            try{   
+                archivo.delete();
                 archivo.createNewFile();
                 FileWriter escribir = new FileWriter(archivo);            
                 PrintWriter line = new PrintWriter(escribir);                                
                     for(Usuario user:IniciarSesion.listaUsuarios){                        
-                        line.println(user.toString());
-                        line.close();                   
-                        }                                          
+                        line.println(user);                    
+                        } 
+                    line.close(); 
+                    escribir.close();
+                    JOptionPane.showMessageDialog(null,"SE HA ENROLADO AL SENSOR EXITOSAMENTE");
                     }
-                catch (IOException ex) {
-                    Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
-                }  
+            catch (IOException ex) {
+                Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
+            }  
+        }  
+    public static void agragarPropiedad(Usuario u){
+        String[] propiedades = {"co","humidity","ligth","lpg","motion","smoke","temp"};
+        int eleccion = JOptionPane.showOptionDialog(null, "ESCOJA LA PROPIEDAD QUE DESEA AGREGAR", "REGISTRO USUARIO"
+            ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
+            ,null, propiedades, propiedades[0]);
+        String peligro = JOptionPane.showInputDialog("ESCRIBA EL VALOR DE PELIGRO");
+        String moderado = JOptionPane.showInputDialog("ESCRIBA EL VALOR MODERADO");
+        u.getPropiedades().put(propiedades[eleccion],peligro+"/"+moderado);
+        File archivo = new File("ListaUsuarios.txt");                    
+        try {
+            archivo.delete();
+            archivo.createNewFile();
+            FileWriter escribir = new FileWriter(archivo,true);
+            PrintWriter line = new PrintWriter(escribir,true);
+            for(Usuario user:IniciarSesion.listaUsuarios){
+                line.println(user);
             }
-            else{                            
-                try{          
-                archivo.createNewFile();
-                FileWriter escribir = new FileWriter(archivo);            
-                PrintWriter line = new PrintWriter(escribir);                                
-                    for(Usuario user:IniciarSesion.listaUsuarios){                 
-                        line.println(user.toString());
-                        line.close();                   
-                        }                                          
-                    }
-                catch (IOException ex) {
-                    Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
-                }  
+            line.close();
+            escribir.close();
+            JOptionPane.showMessageDialog(null, "SE HA AGREGAD0 LA PROPIEDAD");            
+            } 
+        catch (IOException ex) {
+            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
