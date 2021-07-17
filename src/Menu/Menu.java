@@ -12,13 +12,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 
-public class Menu {
+ public class Menu {
     public static ArrayList<Sensor> sensores = new ArrayList<>(); 
     public static ArrayList<String> sensoresIds = new ArrayList<>();    
     public static void main(String[] args) {        
@@ -102,7 +101,11 @@ public class Menu {
             case 1:
                 u = null;                                                
                 u = RegistrarUsuario();
-                JOptionPane.showMessageDialog(null, "REINCIE LA APLICACION PARA INICIAR SESION.");                
+                try{
+                if(u != null){
+                    JOptionPane.showMessageDialog(null, "REINCIE LA APLICACION PARA INICIAR SESION.");} }
+                catch(NullPointerException ex){}
+                JOptionPane.showMessageDialog(null, "REINCIE LA APLICACION E INTENTE DE NUEVO");
                 return null;          
             case 2:
                 break;
@@ -174,8 +177,20 @@ public class Menu {
                             crearNotificaciones(u);
                             eleccion = JOptionPane.showOptionDialog(null, "ELIJA QUE OPCION QUE DESEA", "PROPIEDADES"
                                 ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
-                                ,null, u.getPropiedades().keySet().toArray(), u.getPropiedades().keySet().toArray()[0]);                                
-                            generarNotificaciones(u,JOptionPane.showInputDialog("INGRESE UN RANGO DE FECHAS(dd-mm-año/dd-mm-año)"),String.valueOf(u.getPropiedades().keySet().toArray()[eleccion]));
+                                ,null, u.getPropiedades().keySet().toArray(), u.getPropiedades().keySet().toArray()[0]);
+                            boolean i = false;
+                            String rangoFechas = JOptionPane.showInputDialog("INGRESE UN RANGO DE FECHAS(dd-mm-año/dd-mm-año)");
+                            while(i!=true){
+                            try{    
+                                i = generarNotificaciones(u,rangoFechas,
+                                    String.valueOf(u.getPropiedades().keySet().toArray()[eleccion]));}
+                            catch(ArrayIndexOutOfBoundsException ex){
+                                i=false;
+                                JOptionPane.showMessageDialog(null,"VUELVA A INGRESAR LA FECHA"); 
+                                rangoFechas = JOptionPane.showInputDialog("INGRESE UN RANGO DE FECHAS(dd-mm-año/dd-mm-año)");
+                                }                                                        
+                            }
+                            JOptionPane.showMessageDialog(null,"SE CREARON LAS NOTIFICACIONES EN LA FECHA ESTABLECIDA");
                             break;
                         case 2:
                             Menu.desactivarNotificaciones();
@@ -263,18 +278,17 @@ public class Menu {
                 case "motion":
                  for(Observacion o:Notificacion.observaciones){
                     if(o.getObservacion().contains(p) ){
-                       String [] s = o.getObservacion().split(" ");        
-                        
-                    boolean value = Boolean.parseBoolean(s[19]);
-                    if(value == false){
-                        Notificacion n = new NotificacionPropiedad(p,0.0f,s[9]); 
-                        n.setEtiqueta("PELIGRO");
-                        u.getNotificaciones().add(n);                        
-                    }                    
-                    else if(value == true){
-                        Notificacion n = new NotificacionPropiedad(p,1.0f,s[9]); 
-                        n.setEtiqueta("MODERADO"); 
-                        u.getNotificaciones().add(n);                        
+                       String [] s = o.getObservacion().split(" ");                        
+                        boolean value = Boolean.parseBoolean(s[19]);
+                        if(value == false){
+                            Notificacion n = new NotificacionPropiedad(p,0.0f,s[9]); 
+                            n.setEtiqueta("PELIGRO");
+                            u.getNotificaciones().add(n);                        
+                        }                    
+                        else if(value == true){
+                            Notificacion n = new NotificacionPropiedad(p,1.0f,s[9]); 
+                            n.setEtiqueta("MODERADO"); 
+                            u.getNotificaciones().add(n);                        
                         }
                     }
                  }
@@ -514,7 +528,7 @@ public class Menu {
                 System.err.println("NO SE ENCUANTRA EL ARCHIVO");                    
             } 
         }             
-    public static void generarNotificaciones(Usuario u, String rangoFechas,String propiedad){
+    public static boolean generarNotificaciones(Usuario u, String rangoFechas,String propiedad){
         String[] rango = rangoFechas.split("/");  //dd/m/año-dd/m/año
         File archivo = new File("NOTIFICACIONES"+" "+u.getNombreUsuario().toUpperCase()+" "+propiedad+" "+rango[0]+"-"+rango[1]+".txt");        
         if(!archivo.exists()){               
@@ -528,13 +542,15 @@ public class Menu {
                         }
                     }     
                  for(Notificacion n:u.getNotificaciones()){
-                     if(n.getEtiqueta().equals("MODERADO") && n.validarFecha(rangoFechas)&& n.toString().contains(propiedad)){
+                     if(n.getEtiqueta().equals("MODERADO") && n.validarFecha(rangoFechas) && n.toString().contains(propiedad)){
                        line.println(n.toString());
                     }
                 line.close();
                 escribir.close();
-                }
-            } catch (IOException ex) {
+                return true;
+                    }
+                } 
+            catch (IOException ex) {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }        
         }       
@@ -551,12 +567,14 @@ public class Menu {
                     }
                 }
                 line.close();
-                escribir.close();
+                escribir.close(); 
+                return true;
             }    
             catch(IOException ex){
                 ex.printStackTrace();                  
                     } 
-                } 
+                }
+            return false;
             }
     public static void enrolarSensor(){
         //usuario:****-contraseña:****-propiedad:**-rangovalores-sensor1;sensor2.....
@@ -566,8 +584,7 @@ public class Menu {
                 archivo.createNewFile();
                 FileWriter escribir = new FileWriter(archivo);            
                 PrintWriter line = new PrintWriter(escribir);                                
-                    for(Usuario user:IniciarSesion.listaUsuarios){ 
-                        System.out.println(user);
+                    for(Usuario user:IniciarSesion.listaUsuarios){                        
                         line.println(user.toString());
                         line.close();                   
                         }                                          
@@ -593,3 +610,4 @@ public class Menu {
         }
     }
     
+
