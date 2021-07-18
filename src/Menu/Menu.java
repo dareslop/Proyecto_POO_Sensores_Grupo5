@@ -34,11 +34,19 @@ import javax.swing.JOptionPane;
         int eleccion = JOptionPane.showOptionDialog(null, "ESCOJA SU PROPIEDAD INCIAL", "REGISTRO USUARIO"
                     ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
                     ,null, propiedades, propiedades[0]);
-        JOptionPane.showMessageDialog(null, "SE HA ENROLADO A LA PROPIEDAD "+propiedades[eleccion]);
+        String rangoPeligro;
+        String rangoModerado;        
+        JOptionPane.showMessageDialog(null, "SE HA ENROLADO A LA PROPIEDAD "+propiedades[eleccion]);        
         String nombre = JOptionPane.showInputDialog("Escriba el nombre de usuario que desea: ");
-        String contraseña = JOptionPane.showInputDialog("Escriba su contraseña: ");                                
-        String rangoPeligro =JOptionPane.showInputDialog("ingrese el valor de peligro");
-        String rangoModerado =JOptionPane.showInputDialog("ingrese el valor de moderado");
+        String contraseña = JOptionPane.showInputDialog("Escriba su contraseña: "); 
+        if(propiedades[eleccion].equals("light")||propiedades[eleccion].equals("motion")){
+            rangoPeligro =JOptionPane.showInputDialog("ingrese el valor de peligro('0.0')");
+            rangoModerado =JOptionPane.showInputDialog("ingrese el valor de moderado('1.0')");
+        }
+        else{
+        rangoPeligro =JOptionPane.showInputDialog("ingrese el valor de peligro");
+        rangoModerado =JOptionPane.showInputDialog("ingrese el valor de moderado");
+        }
         Usuario usuario = new Usuario(nombre,contraseña,propiedades[eleccion],rangoPeligro,rangoModerado);
         IniciarSesion.leerListaUsuarios();
         ArrayList<Usuario> usuarios = IniciarSesion.listaUsuarios;         
@@ -85,7 +93,7 @@ import javax.swing.JOptionPane;
     public static Usuario inicioSistema(){
         String[] opciones = {"INICIAR SESION","REGISTRARSE","SALIR"};
         JOptionPane.showMessageDialog(null,"BIENVENIDO A SU SISTEMA DE NOTIFICACIONES");        
-        int eleccion = JOptionPane.showOptionDialog(null, "INICIE SESION O REGISTRESE PARA CONTINUAR", "SENSORES"
+        int eleccion = JOptionPane.showOptionDialog(null, "INICIE SESION O REGISTRESE PARA CONTINUAR", "BIENVENIDO"
                     ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
                     ,null, opciones, opciones[0]);
         switch(eleccion){
@@ -95,7 +103,10 @@ import javax.swing.JOptionPane;
                 while(!iniciar){
                 String nombre = JOptionPane.showInputDialog("Escriba su nombre de usuario: ");
                 String pass = JOptionPane.showInputDialog("Escriba su contraseña: ");                  
-                IniciarSesion.leerListaUsuarios();                
+                if(IniciarSesion.leerListaUsuarios()==false){
+                    JOptionPane.showMessageDialog(null,"USUARIO NO EXISTE, REGISTRESE PARA INCIAR SESION");
+                    return null;
+                }                
                 u = IniciarSesion.login(nombre,pass);  
                 if(u!=null){
                     iniciar = true;
@@ -224,7 +235,7 @@ import javax.swing.JOptionPane;
                                 File ruta = new File(dic);
                                 String[] files = ruta.list();
                                 for(String f:files){
-                                    if(f.contains("NOTIFICACION")&&f.contains(u.getNombreUsuario())){
+                                    if((f.contains("NOTIFICACION") && f.contains(u.getNombreUsuario())) || f.contains("NOTIFICACION") && f.contains(u.getNombreUsuario().toUpperCase())){
                                         notificacionesUsuario.add(f.substring(0, f.length()-4));
                                     }
                                 }
@@ -546,7 +557,20 @@ import javax.swing.JOptionPane;
                 JOptionPane.showMessageDialog(null,"SE HA DESVINCULADO A LA PROPIEDAD "+s);
             }            
         }
-        f.delete();
+        f.delete();        
+        switch(JOptionPane.showInternalConfirmDialog(null, "DESEA DESENROLARSE A UN SENSOR?")){
+            case -1:
+                break;
+            case 0:
+                int eleccion = JOptionPane.showOptionDialog(null, "ELIJA EL SENSOR A DESENROLAR", "DESENROLAR SENSOR"
+                        ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
+                        ,null, u.getSensoresIds().toArray(), u.getSensoresIds().toArray()[0]);
+                JOptionPane.showMessageDialog(null,"SE HA DESVINCULADO AL SENSOR "+u.getSensoresIds().toArray()[eleccion]);                
+                u.getSensoresIds().remove(eleccion);                
+                break;
+            case 1:
+                break;
+        }
         File archivo = new File("ListaUsuarios.txt");
         try{
         archivo.delete();
@@ -682,3 +706,4 @@ import javax.swing.JOptionPane;
         }
     }
     
+
