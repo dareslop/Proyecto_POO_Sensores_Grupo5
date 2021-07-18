@@ -1,3 +1,0 @@
-Usuario:Diego-Contraseña:chao123-Propiedad:temp;smoke;ligth;-50.0/20.0;0.020/0.010;0.0/1.0;-"b8:27:eb:bf:9d:51";
-Usuario:Emanuel-Contraseña:hola123-Propiedad:ligth;-0.0/1.0;-"00:0f:00:70:91:0a";"1c:bf:ce:15:ec:4d";"b8:27:eb:bf:9d:51";
-
