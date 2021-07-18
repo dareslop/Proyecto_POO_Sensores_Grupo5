@@ -612,51 +612,33 @@ import javax.swing.JOptionPane;
     public static boolean generarNotificaciones(Usuario u, String rangoFechas,String propiedad){
         String[] rango = rangoFechas.split("/");  //dd/m/año-dd/m/año
         File archivo = new File("NOTIFICACIONES"+" "+u.getNombreUsuario().toUpperCase()+" "+propiedad+" "+rango[0]+"-"+rango[1]+".txt");        
-        if(!archivo.exists()){               
+                       
             try{
                 archivo.createNewFile();
                 FileWriter escribir = new FileWriter(archivo,true);
                 PrintWriter line = new PrintWriter(escribir);                      
-                for(Notificacion n:u.getNotificaciones()){                    
+                for(Notificacion n:u.getNotificaciones()){ 
+                    //System.out.println(n.validarFecha(rangoFechas));
                     if(n.getEtiqueta().equals("PELIGRO") && n.validarFecha(rangoFechas) && n.toString().contains(propiedad)){                        
                        line.println(n.toString());
                         }
                     }     
                  for(Notificacion n:u.getNotificaciones()){
+                     //System.out.println(n.validarFecha(rangoFechas));
                      if(n.getEtiqueta().equals("MODERADO") && n.validarFecha(rangoFechas) && n.toString().contains(propiedad)){
                        line.println(n.toString());
                     }
+                }
                 line.close();
                 escribir.close();
                 return true;
-                    }
+                    
                 } 
             catch (IOException ex) {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
-            }        
-        }       
-        else{
-            try{                
-                FileWriter escribir = new FileWriter(archivo,true);
-                PrintWriter line = new PrintWriter(escribir);                                                     
-                for(Notificacion n:u.getNotificaciones()){
-                    if(n.getEtiqueta().equals("PELIGRO") && n.validarFecha(rangoFechas)){
-                        line.println(n.toString());
-                    }
-                    else if(n.getEtiqueta().equals("MODERADO") && n.validarFecha(rangoFechas)){
-                       line.println(n.toString());
-                    }
-                }
-                line.close();
-                escribir.close(); 
-                return true;
-            }    
-            catch(IOException ex){
-                ex.printStackTrace();                  
-                    } 
-                }
+            }  
             return false;
-            }
+        }
     public static void enrolarSensor(){
         //usuario:****-contraseña:****-propiedad:**-rangovalores-sensor1;sensor2.....
         File archivo = new File("ListaUsuarios.txt");     
