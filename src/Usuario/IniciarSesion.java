@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 public class IniciarSesion {
     public static ArrayList<Usuario> listaUsuarios = new ArrayList<>();    
    
-    public static void leerListaUsuarios(){
+    public static boolean leerListaUsuarios(){
        Usuario u=null;
         try (BufferedReader lector = new BufferedReader(new FileReader("ListaUsuarios.txt"))){             
             String line = "";            
@@ -40,14 +40,16 @@ public class IniciarSesion {
                             //JOptionPane.showMessageDialog(null, "NO HAY SENSORES");
                             }
                         listaUsuarios.add(u);
+                        return true;
                         }                    
                     }          
     catch (FileNotFoundException ex) {
-            System.err.println("No existe el archivo: "+ex);
+            System.err.println("No existe el archivo: "+ex);      
         } 
     catch (IOException ex) {
-            System.err.println("Error lectura del archivo: "+ex);
+            System.err.println("Error lectura del archivo: "+ex);            
         }
+        return false;
     } 
     public static Usuario login(String nombre,String pass){   
         Usuario u = new Usuario(nombre,pass);        
@@ -72,5 +74,12 @@ public class IniciarSesion {
     return null;   
         }    
 }
+   
+
+    
+  
+
+
+
    
    
