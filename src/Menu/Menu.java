@@ -1,3 +1,8 @@
+/**
+ @authon Emanuel Guerrero
+ @author Diego Vega
+ @author Darien Lopez
+ **/
 package Menu;
 
 import Notificacion.Notificacion;
@@ -122,23 +127,52 @@ import javax.swing.JOptionPane;
                 JOptionPane.showMessageDialog(null, "BIENVENIDO "+u.getNombreUsuario());  
                 Object[] p = u.getPropiedades().keySet().toArray();
                 for(int i=0; i<u.getPropiedades().keySet().toArray().length;i++){
-                    JOptionPane.showMessageDialog(null, "ESTA ENROLADO A LA PROPIEDAD "+(i+1)+"."+" "+p[i]);
-                }                
-                switch(JOptionPane.showConfirmDialog(null,"DESEA AGREGAR OTRA PROPIEDAD?" )){
-                    case -1:
-                        break;
-                    case 0:
-                       Menu.agragarPropiedad(u);
-                       break;
-                    case 1:
-                        break;
-                    }
+                    JOptionPane.showMessageDialog(null, "ESTA ENROLADO A LA PROPIEDAD\n"+(i+1)+"."+" "+p[i]);
+                }
+                if(u.getPropiedades().keySet().size()<7){
+                    switch(JOptionPane.showConfirmDialog(null,"DESEA AGREGAR OTRA PROPIEDAD?" )){
+                        case -1:
+                            break;
+                        case 0:
+                           Menu.agregarPropiedad(u);
+                           break;
+                        case 1:
+                            break;
+                            }
+                        }
                     sensores.forEach((s) -> { 
                     s.generarObservacion();}); 
                     sensores.forEach((Sensor s)->{
                         if(!sensoresIds.contains(s.getId())){
                     sensoresIds.add(s.getId());}
                     });
+                    JOptionPane.showInternalMessageDialog(null, "ESTA ENROLADO A LOS SIGIENTES SENSORES:\n"+u.getSensoresIds());
+                    int eleccion = 1;
+                    if(u.getSensoresIds().size()==0 ){
+                        eleccion= JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A UN SENSOR?");   
+                    }
+                    else if(u.getSensoresIds().size()==Menu.sensoresIds.size() ){
+                        eleccion = -1;
+                        }
+                    else if(u.getSensoresIds().size()<Menu.sensoresIds.size() && u.getSensoresIds().size()>0 ){
+                        eleccion = JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A OTRO SENSOR?");
+                    }
+                    switch(eleccion){
+                        case -1:
+                            break;
+                        case 0:
+                            eleccion = JOptionPane.showOptionDialog(null, "ELIJA SENSOR QUE DESEA", "ENROLAR SENSOR"
+                                    ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
+                                    ,null, Menu.sensoresIds.toArray(), Menu.sensoresIds.toArray()[0]);
+                            String idSensor = String.valueOf(Menu.sensoresIds.toArray()[eleccion]);
+                            u.getSensoresIds().add(idSensor);                                    
+                            Menu.enrolarSensor();                                    
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            break;
+                    }
                     String[] opciones = {"PROGRAMAR NOTIFICACIONES","GENERAR NOTIFICACIONES","DESACTIVAR NOTIFICACIONES"};                   
                     switch(JOptionPane.showOptionDialog(null, "ESCOJA LA OPERACION A REALIZAR", "SISTEMA NOTIFICACIONES"
                         ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
@@ -146,30 +180,7 @@ import javax.swing.JOptionPane;
                         case -1:
                             break;
                         case 0:                           
-                            JOptionPane.showInternalMessageDialog(null, "TIENE "+u.getSensoresIds().size()+" sensores enrolados");
-                            int eleccion = 0;
-                            if(u.getSensoresIds().size()==0){
-                                eleccion= JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A UN SENSOR?");   
-                            }
-                            else{
-                                eleccion = JOptionPane.showConfirmDialog(null,"DESEA ENROLARSEA A OTRO SENSOR?");
-                            }
-                            switch(eleccion){
-                                case -1:
-                                    break;
-                                case 0:
-                                    eleccion = JOptionPane.showOptionDialog(null, "ELIJA SENSOR QUE DESEA", "ENROLAR SENSOR"
-                                            ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
-                                            ,null, Menu.sensoresIds.toArray(), Menu.sensoresIds.toArray()[0]);
-                                    String idSensor = String.valueOf(Menu.sensoresIds.toArray()[eleccion]);
-                                    u.getSensoresIds().add(idSensor);                                    
-                                    Menu.enrolarSensor();                                    
-                                    break;
-                                case 1:
-                                    break;
-                                case 2:
-                                    break;
-                                } 
+                             
                             crearNotificaciones(u);                                      
                             eleccion = JOptionPane.showOptionDialog(null, "ELIJA LA PROPIEDAD QUE DESEA PARA LA NOTIFICACION", "CREAR NOTIFICACION"
                                 ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
@@ -196,7 +207,34 @@ import javax.swing.JOptionPane;
                             JOptionPane.showMessageDialog(null,"SE CREARON LAS NOTIFICACIONES EN LA FECHA ESTABLECIDA");
                             break;
                         case 2:
-                            Menu.desactivarNotificaciones();
+                            if(u.getPropiedades().size()>1){
+                                ArrayList<String> notificacionesUsuario = new ArrayList<String>();
+                                String[] fileRuta;        
+                                fileRuta = new File("proyecto sensores").getAbsolutePath().split("\\\\");
+                                String dic = "C:\\\\";
+                                for(String s:fileRuta){
+                                    if(!dic.contains(s.substring(0, s.length()-2))){
+                                        if(s.equals(fileRuta[fileRuta.length-1])){
+                                        dic+=s;
+                                    }
+                                        else{
+                                    dic+=s+"\\\\";}
+                                    }
+                                }
+                                File ruta = new File(dic);
+                                String[] files = ruta.list();
+                                for(String f:files){
+                                    if(f.contains("NOTIFICACION")&&f.contains(u.getNombreUsuario())){
+                                        notificacionesUsuario.add(f.substring(0, f.length()-4));
+                                    }
+                                }
+                                eleccion = JOptionPane.showOptionDialog(null, "ELIJA LA NOTIFICACION A DESACTIVAR", "DESACTIVAR NOTIFICACIONES"
+                                    ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
+                                    ,null, notificacionesUsuario.toArray(), notificacionesUsuario.toArray()[0]);                      
+                                Menu.desactivarNotificaciones(String.valueOf(notificacionesUsuario.toArray()[eleccion]),u);
+                            break;
+                            }
+                            JOptionPane.showMessageDialog(null,"NO SE PUEDE DESACTIVAR LA NOTIFICACION PORQUE SOLO TIENE UNA PROPIEDAD ENROLADA ");
                             break;                          
                         }            
                     }
@@ -500,15 +538,31 @@ import javax.swing.JOptionPane;
             }
        });
     }
-    public static void desactivarNotificaciones(){
-        String nombreArchivo = JOptionPane.showInputDialog("Escriba el nombre del archivo");
-        File f = new File(nombreArchivo);
-        while(!f.exists()){     
-            JOptionPane.showMessageDialog(null, "NO EXISTE EL ARCHIVO A ELIMINAR");
-            nombreArchivo = JOptionPane.showInputDialog("Escriba el nombre del archivo");
+    public static void desactivarNotificaciones(String nombreArchivo,Usuario u){        
+        File f = new File(nombreArchivo+".txt");        
+        for(String s:nombreArchivo.split(" ")){
+            if(u.getPropiedades().containsKey(s)){
+                u.getPropiedades().remove(s);
+                JOptionPane.showMessageDialog(null,"SE HA DESVINCULADO A LA PROPIEDAD "+s);
+            }            
         }
-        boolean estatus = f.delete();
-        JOptionPane.showMessageDialog(null, "SE HA ELIMINADO LA NOTIFICACION");       
+        f.delete();
+        File archivo = new File("ListaUsuarios.txt");
+        try{
+        archivo.delete();
+        archivo.createNewFile();
+        FileWriter escribir = new FileWriter(archivo,true);
+        PrintWriter line = new PrintWriter(escribir,true);
+        for(Usuario user:IniciarSesion.listaUsuarios){
+            line.println(user.toString());
+                }
+        line.close();
+        escribir.close();
+            } 
+        catch (IOException ex) {
+            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        JOptionPane.showMessageDialog(null, "SE HA ELIMINADO "+nombreArchivo);       
     }
     public static void programarNotificaciones(Usuario u,String propiedad){
         File archivo=null;
@@ -598,14 +652,15 @@ import javax.swing.JOptionPane;
                 Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
             }  
         }  
-    public static void agragarPropiedad(Usuario u){
+    public static void agregarPropiedad(Usuario u){
         String[] propiedades = {"co","humidity","ligth","lpg","motion","smoke","temp"};
         int eleccion = JOptionPane.showOptionDialog(null, "ESCOJA LA PROPIEDAD QUE DESEA AGREGAR", "REGISTRO USUARIO"
             ,JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE
             ,null, propiedades, propiedades[0]);
         String peligro = JOptionPane.showInputDialog("ESCRIBA EL VALOR DE PELIGRO");
         String moderado = JOptionPane.showInputDialog("ESCRIBA EL VALOR MODERADO");
-        u.getPropiedades().put(propiedades[eleccion],peligro+"/"+moderado);
+        if(eleccion!=-1){
+            u.getPropiedades().put(propiedades[eleccion],peligro+"/"+moderado);
         File archivo = new File("ListaUsuarios.txt");                    
         try {
             archivo.delete();
@@ -621,8 +676,9 @@ import javax.swing.JOptionPane;
             } 
         catch (IOException ex) {
             Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+        else{}
         }
     }
     
-
